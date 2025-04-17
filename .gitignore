@@ -1,0 +1,8 @@
+*~
+*.py[cod]
+.*
+!.gitignore
+!.dockerignore
+!.github/
+__pycache__/
+.qodo
