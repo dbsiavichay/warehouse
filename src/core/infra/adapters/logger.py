@@ -1,9 +1,10 @@
 from typing import Optional
 
 import structlog
-from src.core.domain.ports import Logger
 from structlog.processors import TimeStamper, add_log_level
 from structlog.stdlib import LoggerFactory, filter_by_level, render_to_log_kwargs
+
+from src.core.domain.ports import Logger
 
 
 class StructLogger(Logger):
