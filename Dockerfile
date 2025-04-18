@@ -14,8 +14,7 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         git \
         build-essential \
-        cargo \
-        default-jre-headless && \
+        cargo && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
