@@ -17,10 +17,14 @@ down:  ## Stop the docker containers
 tests:  ## Run tests
 	docker compose run --no-deps --rm api pytest --cov='app'
 
-lint-fix:  ## Fix linter errors
-	black . && isort . --profile black && flake8 .	
+lint:  ## Fix linter errors
+	source .venv/bin/activate && black . && isort . --profile black && flake8 .	
 
-lint-check:  ## Run linter
-	docker-compose run --no-deps --rm api black . --check
-	docker-compose run --no-deps --rm api isort . --check-only --profile black
-	docker-compose run --no-deps --rm api flake8 .
+migration:  ## Create a new migration with Alembic
+	docker compose run --no-deps --rm api alembic revision --autogenerate -m "$(m)"
+
+upgrade:  ## Apply all pending migrations with Alembic
+	docker compose run --no-deps --rm api alembic upgrade head
+
+downgrade:  ## Downgrade the database to the previous migration
+	docker compose run --no-deps --rm api alembic downgrade $(d)

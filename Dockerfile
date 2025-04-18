@@ -1,22 +1,22 @@
 FROM python:3.11-slim-buster AS base
 
-WORKDIR /src
+WORKDIR /app
 
 RUN python -m pip install --no-cache-dir --upgrade pip
+
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        libpq-dev \
+        git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 
 FROM base AS development
-
-RUN apt-get update -y && \
-    apt-get install -y --no-install-recommends \
-        git \
-        build-essential \
-        cargo && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
 
 COPY requirements_dev.txt .
 RUN pip install --no-cache-dir -r requirements_dev.txt
