@@ -2,14 +2,12 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import DateTime, String
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
+
+from src.core.infra.db import Base
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-class Product(Base):
+class ProductModel(Base):
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
