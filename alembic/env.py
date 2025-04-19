@@ -4,7 +4,7 @@ from environs import Env
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from src.product.infra.db.models import Base
+from src.core.infra.db import Base
 
 env = Env()
 env.read_env()
