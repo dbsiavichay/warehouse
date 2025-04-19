@@ -1,15 +1,17 @@
 from fastapi import APIRouter
 
-from src.product.infra.controllers import ProductController
+from src.di import get_product_controller
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("")
 def get_all():
-    return ProductController().get_all()
+    controller = get_product_controller()
+    return controller.get_all()
 
 
 @router.get("/{id}")
 def get_by_id(id: int):
-    return ProductController().get_by_id(id)
+    controller = get_product_controller()
+    return controller.get_by_id(id)
