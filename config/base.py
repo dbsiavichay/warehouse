@@ -26,6 +26,11 @@ class BaseConfig:
     )
 
     #
+    # Database config
+    #
+    DB_CONNECTION_STRING = env("DATABASE_URL", "sqlite:///./warehouse.db")
+
+    #
     # OpenTelemetry config
     #
     OTEL_OTLP_ENDPOINT = env("OTEL_OTLP_ENDPOINT", "http://localhost:4317")
