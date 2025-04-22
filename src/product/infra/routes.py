@@ -1,10 +1,21 @@
 from fastapi import APIRouter, Depends
 
 from src import get_product_controller
+from src.product.domain.entities import Product
+from src.product.infra.validators import NewProductSchema
 
 from .controllers import ProductController
 
 router = APIRouter()
+
+
+@router.post("", response_model=Product, summary="Save product")
+def save(
+    new_product: NewProductSchema,
+    controller: ProductController = Depends(get_product_controller),
+):
+    """Saves a product."""
+    return controller.save(new_product)
 
 
 @router.get("", summary="Get all products")

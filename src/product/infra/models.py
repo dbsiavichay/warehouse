@@ -16,5 +16,5 @@ class ProductModel(Base):
     description: Mapped[Optional[str]] = mapped_column(String(255))
     category: Mapped[Optional[str]] = mapped_column(String(128))
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, default=datetime.now()
+        DateTime, nullable=False, default=datetime.now
     )
