@@ -5,9 +5,9 @@ from typing import Optional
 
 @dataclass
 class Product:
-    id: int
     name: str
     sku: str
-    description: Optional[str]
-    category: Optional[str]
-    created_at: datetime
+    id: Optional[int] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    created_at: Optional[datetime] = None

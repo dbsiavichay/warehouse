@@ -4,6 +4,7 @@ from fastapi import Depends
 
 from config import config
 from src.core.infra.di import DependencyContainer, LifetimeScope
+from src.product.app.commands import SaveProductCommand
 from src.product.app.queries import ProductQueries
 from src.product.domain.repositories import ProductRepository
 from src.product.infra.controllers import ProductController
@@ -29,6 +30,17 @@ def initialize_dependencies() -> None:
         scope=LifetimeScope.SCOPED,
     )
 
+    # Register the product commands
+    container.register(
+        SaveProductCommand,
+        factory=lambda c, scope_id=None: SaveProductCommand(
+            c.resolve_scoped(ProductRepository, scope_id)
+            if scope_id
+            else c.resolve(ProductRepository)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+
     # Register the product queries
     container.register(
         ProductQueries,
@@ -44,9 +56,12 @@ def initialize_dependencies() -> None:
     container.register(
         ProductController,
         factory=lambda c, scope_id=None: ProductController(
+            c.resolve_scoped(SaveProductCommand, scope_id)
+            if scope_id
+            else c.resolve(SaveProductCommand),
             c.resolve_scoped(ProductQueries, scope_id)
             if scope_id
-            else c.resolve(ProductQueries)
+            else c.resolve(ProductQueries),
         ),
         scope=LifetimeScope.SCOPED,
     )
