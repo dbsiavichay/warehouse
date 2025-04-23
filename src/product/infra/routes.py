@@ -56,8 +56,3 @@ class ProductRouter:
     ):
         """Retrieves a specific product by its ID."""
         return controller.get_by_id(id)
-
-
-# Router instance to be included by the main application
-product_router = ProductRouter()
-router = product_router.router  # Export the router for compatibility or direct use

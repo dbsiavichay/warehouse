@@ -4,16 +4,20 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from src import initialize_dependencies
+from src import initialize
 from src.core.infra.middlewares import ErrorHandlingMiddleware
-from src.product.infra.routes import router as product_router
+from src.product.infra.routes import ProductRouter
+from src.stock.infra.routes import StockRouter
+
+product_router = ProductRouter()
+stock_router = StockRouter()
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(message)s")
 
 
 origins = ["http://localhost:3000"]
 
-initialize_dependencies()
+initialize()
 
 app = FastAPI()
 
@@ -27,7 +31,8 @@ app.add_middleware(
 )
 app.add_middleware(ErrorHandlingMiddleware)
 
-app.include_router(product_router, prefix="/products", tags=["products"])
+app.include_router(product_router.router, prefix="/products", tags=["products"])
+app.include_router(stock_router.router, prefix="/stock", tags=["stock"])
 
 
 @app.get("/")

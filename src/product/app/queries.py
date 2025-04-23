@@ -5,11 +5,11 @@ from src.product.domain.repositories import ProductRepository
 
 
 class ProductQueries:
-    def __init__(self, product_repository: ProductRepository):
-        self.product_repository = product_repository
+    def __init__(self, repo: ProductRepository):
+        self.repo = repo
 
     def get_all(self) -> List[Product]:
-        return self.product_repository.get_all()
+        return self.repo.get_all()
 
     def get_by_id(self, id: int) -> Product | None:
-        return self.product_repository.get_by_id(id)
+        return self.repo.get_by_id(id)
