@@ -20,6 +20,7 @@ class ProductRouter:
         self.router.put("/{id}", response_model=Product, summary="Update product")(
             self.update
         )
+        self.router.delete("/{id}", summary="Delete product")(self.delete)
         self.router.get("", summary="Get all products")(self.get_all)
         self.router.get("/{id}", summary="Get product by ID")(self.get_by_id)
 
@@ -39,6 +40,12 @@ class ProductRouter:
     ):
         """Updates a product."""
         return controller.update(id, product)
+
+    def delete(
+        self, id: int, controller: ProductController = Depends(get_product_controller)
+    ):
+        """Deletes a product."""
+        return controller.delete(id)
 
     def get_all(self, controller: ProductController = Depends(get_product_controller)):
         """Retrieves all products."""

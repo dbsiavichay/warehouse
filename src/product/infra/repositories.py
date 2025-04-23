@@ -76,3 +76,14 @@ class ProductRepositoryImpl(ProductRepository):
         if product:
             return ProductMapper.to_entity(product)
         return None
+
+    def delete(self, id: int) -> None:
+        """Deletes a product by its ID
+        Args:
+            id (int): The ID of the product to delete
+        """
+        product = self.session.query(ProductModel).filter(ProductModel.id == id).first()
+
+        if product:
+            self.session.delete(product)
+            self.session.commit()
