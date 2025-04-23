@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from src import initialize_dependencies
+from src.core.infra.middlewares import ErrorHandlingMiddleware
 from src.product.infra.routes import router as product_router
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(message)s")
@@ -24,7 +25,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# app.add_middleware(ErrorHandlingMiddleware)
+app.add_middleware(ErrorHandlingMiddleware)
 
 app.include_router(product_router, prefix="/products", tags=["products"])
 
