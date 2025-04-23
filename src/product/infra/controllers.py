@@ -3,7 +3,7 @@ from typing import List
 from src.product.app.commands import SaveProductCommand
 from src.product.app.queries import ProductQueries
 from src.product.domain.entities import Product
-from src.product.infra.validators import NewProductSchema
+from src.product.infra.validators import ProductSchema
 
 
 class ProductController:
@@ -13,9 +13,16 @@ class ProductController:
         self.save_product_command = save_product_command
         self.product_queries = product_queries
 
-    def save(self, new_product: NewProductSchema) -> Product:
+    def create(self, new_product: ProductSchema) -> Product:
         product = Product(
             **new_product.model_dump(exclude_none=True),
+        )
+        return self.save_product_command.execute(product)
+
+    def update(self, id: int, product: ProductSchema) -> Product:
+        product = Product(
+            id=id,
+            **product.model_dump(exclude_none=True),
         )
         return self.save_product_command.execute(product)
 
