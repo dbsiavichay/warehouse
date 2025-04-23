@@ -15,7 +15,6 @@ config = context.config
 
 
 db_url = env("DATABASE_URL", "sqlite:///./default.db")
-print("DB URL >>>", db_url)
 config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging.
