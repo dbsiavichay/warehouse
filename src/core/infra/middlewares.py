@@ -45,6 +45,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
                 status_code=exc.status_code,
                 content={
                     "error": exc.message,
+                    "message": exc.detail,
                     "timestamp": timestamp,
                     "request_id": request_id,
                 },

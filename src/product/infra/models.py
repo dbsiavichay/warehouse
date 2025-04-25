@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import DateTime, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.infra.db import Base
 
@@ -17,4 +17,7 @@ class ProductModel(Base):
     category: Mapped[Optional[str]] = mapped_column(String(128))
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.now
+    )
+    movements: Mapped[list["MovementModel"]] = relationship(
+        back_populates="product", cascade="all, delete-orphan"
     )

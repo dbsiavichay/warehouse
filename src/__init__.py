@@ -4,6 +4,10 @@ from fastapi import Depends
 
 from config import config
 from src.core.infra.di import DependencyContainer, LifetimeScope
+from src.movement.app.commands import MovementCommands
+from src.movement.domain.repositories import MovementRepository
+from src.movement.infra.controllers import MovementController
+from src.movement.infra.repositories import MovementRepositoryImpl
 from src.product.app.commands import ProductCommands
 from src.product.app.queries import ProductQueries
 from src.product.domain.repositories import ProductRepository
@@ -31,6 +35,14 @@ def init_repositories() -> None:
     container.register(
         StockRepository,
         factory=lambda c, scope_id=None: StockRepositoryImpl(
+            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session()
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    # Register the movement repository
+    container.register(
+        MovementRepository,
+        factory=lambda c, scope_id=None: MovementRepositoryImpl(
             c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session()
         ),
         scope=LifetimeScope.SCOPED,
@@ -73,6 +85,19 @@ def init_commands() -> None:
         ),
         scope=LifetimeScope.SCOPED,
     )
+    # Register the movement commands
+    container.register(
+        MovementCommands,
+        factory=lambda c, scope_id=None: MovementCommands(
+            c.resolve_scoped(MovementRepository, scope_id)
+            if scope_id
+            else c.resolve(MovementRepository),
+            c.resolve_scoped(StockRepository, scope_id)
+            if scope_id
+            else c.resolve(StockRepository),
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
 
 
 def init_controllers() -> None:
@@ -97,6 +122,16 @@ def init_controllers() -> None:
             c.resolve_scoped(StockQueries, scope_id)
             if scope_id
             else c.resolve(StockQueries)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    # Register the movement controller
+    container.register(
+        MovementController,
+        factory=lambda c, scope_id=None: MovementController(
+            c.resolve_scoped(MovementCommands, scope_id)
+            if scope_id
+            else c.resolve(MovementCommands)
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -140,6 +175,19 @@ def get_stock_controller(
 ) -> StockController:
     """Gets the stock controller for a specific request."""
     controller = container.resolve_scoped(StockController, scope_id)
+    try:
+        yield controller
+    finally:
+        # Close the scope when the request ends
+        container.close_scope(scope_id)
+
+
+# Dependency to get the movement controller in a request scope
+def get_movement_controller(
+    scope_id: str = Depends(get_request_scope_id),
+) -> MovementController:
+    """Gets the movement controller for a specific request."""
+    controller = container.resolve_scoped(MovementController, scope_id)
     try:
         yield controller
     finally:
