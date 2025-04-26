@@ -6,6 +6,14 @@ from src.stock.domain.entities import Stock
 
 class StockRepository(ABC):
     @abstractmethod
+    def create(self, stock: Stock) -> Stock:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update(self, stock: Stock) -> Stock:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_by_product_id(self, id: int) -> Stock | None:
         raise NotImplementedError
 

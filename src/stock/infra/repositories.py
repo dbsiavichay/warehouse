@@ -13,12 +13,27 @@ class StockRepositoryImpl(StockRepository):
     def __init__(self, session: Session):
         self.session = session
 
+    def create(self, stock: Stock) -> Stock:
+        stock_dict = StockMapper.to_dict(stock)
+        stock_model = StockModel(**stock_dict)
+        self.session.add(stock_model)
+        self.session.commit()
+        return StockMapper.to_entity(stock_model)
+
+    def update(self, stock: Stock) -> Stock:
+        stock_dict = StockMapper.to_dict(stock)
+        self.session.query(StockModel).filter(
+            StockModel.product_id == stock.product_id
+        ).update(stock_dict)
+        self.session.commit()
+        return stock
+
     def get_by_product_id(self, id: int) -> Stock | None:
         stock = (
             self.session.query(StockModel).filter(StockModel.product_id == id).first()
         )
         if not stock:
-            return Stock(product_id=id, quantity=0)
+            return None
         return StockMapper.to_entity(stock)
 
     def get_all(self) -> List[Stock]:

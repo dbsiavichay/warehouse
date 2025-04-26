@@ -6,11 +6,13 @@ from fastapi.responses import RedirectResponse
 
 from src import initialize
 from src.core.infra.middlewares import ErrorHandlingMiddleware
+from src.movement.infra.routes import MovementRouter
 from src.product.infra.routes import ProductRouter
 from src.stock.infra.routes import StockRouter
 
 product_router = ProductRouter()
 stock_router = StockRouter()
+movement_router = MovementRouter()
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:     %(message)s")
 
@@ -33,6 +35,7 @@ app.add_middleware(ErrorHandlingMiddleware)
 
 app.include_router(product_router.router, prefix="/products", tags=["products"])
 app.include_router(stock_router.router, prefix="/stock", tags=["stock"])
+app.include_router(movement_router.router, prefix="/movements", tags=["movements"])
 
 
 @app.get("/")
