@@ -15,6 +15,7 @@ class MovementMapper:
             quantity=model.quantity,
             type=model.type,
             reason=model.reason,
+            date=model.date,
         )
 
     @staticmethod
@@ -25,6 +26,7 @@ class MovementMapper:
             "quantity": entity.quantity,
             "type": entity.type,
             "reason": entity.reason,
+            "date": entity.date,
         }
 
         if entity.id:

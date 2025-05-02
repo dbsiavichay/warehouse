@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends
 
 from src import get_movement_controller
-from src.movement.infra.validators import MovementInput, MovementResponse
+from src.movement.infra.validators import (
+    MovementInput,
+    MovementQueryParams,
+    MovementResponse,
+)
 
 from .controllers import MovementController
 
@@ -16,6 +20,9 @@ class MovementRouter:
         self.router.post("", response_model=MovementResponse, summary="Save movement")(
             self.create
         )
+        self.router.get(
+            "", response_model=list[MovementResponse], summary="Get all movements"
+        )(self.get_all)
 
     def create(
         self,
@@ -24,3 +31,11 @@ class MovementRouter:
     ) -> MovementResponse:
         """Save a new movement."""
         return movement_controller.create(new_movement)
+
+    def get_all(
+        self,
+        query_params: MovementQueryParams = Depends(),
+        movement_controller: MovementController = Depends(get_movement_controller),
+    ) -> list[MovementResponse]:
+        """Get all movements."""
+        return movement_controller.get_all(query_params)

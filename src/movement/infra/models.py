@@ -16,5 +16,6 @@ class MovementModel(Base):
     quantity: Mapped[int]
     type: Mapped[MovementType]
     reason: Mapped[Optional[str]] = mapped_column(String(128))
+    date: Mapped[Optional[datetime]] = mapped_column(default=datetime.now)
     created_at: Mapped[Optional[datetime]] = mapped_column(default=datetime.now)
     product: Mapped["ProductModel"] = relationship(back_populates="movements")

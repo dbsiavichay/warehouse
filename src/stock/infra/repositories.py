@@ -2,8 +2,8 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
+from src.stock.app.repositories import StockRepository
 from src.stock.domain.entities import Stock
-from src.stock.domain.repositories import StockRepository
 from src.stock.infra.models import StockModel
 
 from .mappers import StockMapper
