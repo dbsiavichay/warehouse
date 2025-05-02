@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from src.movement.domain.constants import MovementType
 from src.movement.domain.exceptions import InvalidMovementTypeException
@@ -11,6 +12,7 @@ class MovementBase(BaseModel):
     quantity: int
     type: MovementType
     reason: Optional[str] = None
+    date: Optional[datetime] = None
 
 
 class MovementInput(MovementBase):
@@ -36,3 +38,13 @@ class MovementInput(MovementBase):
 
 class MovementResponse(MovementBase):
     id: int
+
+
+class MovementQueryParams(BaseModel):
+    product_id: Optional[int] = None
+    type: Optional[MovementType] = None
+    from_date: Optional[datetime] = None
+    to_date: Optional[datetime] = None
+
+    limit: Optional[int] = Field(100, ge=1, le=1000)
+    offset: Optional[int] = Field(0, ge=0)

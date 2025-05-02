@@ -1,7 +1,8 @@
 from typing import List
 
 from src.product.app.types import ProductOutput
-from src.product.domain.repositories import ProductRepository
+
+from .repositories import ProductRepository
 
 
 class ProductQueries:

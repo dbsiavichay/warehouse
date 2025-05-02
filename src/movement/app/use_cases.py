@@ -1,8 +1,11 @@
+from typing import List
+
 from src.movement.app.types import MovementInput, MovementOutput
 from src.movement.domain.entities import Movement
-from src.movement.domain.repositories import MovementRepository
+from src.stock.app.repositories import StockRepository
 from src.stock.domain.entities import Stock
-from src.stock.domain.repositories import StockRepository
+
+from .repositories import MovementRepository
 
 
 class CreateMovementUseCase:
@@ -21,3 +24,12 @@ class CreateMovementUseCase:
             stock.update_quantity(movement.quantity)
             self.stock_repo.update(stock)
         return movement.dict()
+
+
+class FilterMovementsUseCase:
+    def __init__(self, movement_repo: MovementRepository):
+        self.movement_repo = movement_repo
+
+    def execute(self, **params) -> List[MovementOutput]:
+        movements = self.movement_repo.filter_by(**params)
+        return [movement.dict() for movement in movements]

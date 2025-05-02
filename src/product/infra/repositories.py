@@ -2,8 +2,8 @@ from typing import List
 
 from sqlalchemy.orm import Session
 
+from src.product.app.repositories import ProductRepository
 from src.product.domain.entities import Product
-from src.product.domain.repositories import ProductRepository
 from src.product.infra.mappers import ProductMapper
 from src.product.infra.models import ProductModel
 

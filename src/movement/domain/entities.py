@@ -15,6 +15,7 @@ class Movement(Entity):
     type: MovementType
     id: Optional[int] = None
     reason: Optional[str] = None
+    date: Optional[datetime] = None
     created_at: Optional[datetime] = None
 
     def __post_init__(self):

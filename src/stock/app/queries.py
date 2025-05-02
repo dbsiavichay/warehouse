@@ -1,7 +1,6 @@
 from typing import List
 
-from src.stock.domain.repositories import StockRepository
-
+from .repositories import StockRepository
 from .types import StockOutput
 
 

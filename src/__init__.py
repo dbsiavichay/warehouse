@@ -4,21 +4,21 @@ from fastapi import Depends
 
 from config import config
 from src.core.infra.di import DependencyContainer, LifetimeScope
-from src.movement.app.use_cases import CreateMovementUseCase
-from src.movement.domain.repositories import MovementRepository
+from src.movement.app.repositories import MovementRepository
+from src.movement.app.use_cases import CreateMovementUseCase, FilterMovementsUseCase
 from src.movement.infra.controllers import MovementController
 from src.movement.infra.repositories import MovementRepositoryImpl
 from src.product.app.queries import ProductQueries
+from src.product.app.repositories import ProductRepository
 from src.product.app.use_cases import (
     CreateProductUseCase,
     DeleteProductUseCase,
     UpdateProductUseCase,
 )
-from src.product.domain.repositories import ProductRepository
 from src.product.infra.controllers import ProductController
 from src.product.infra.repositories import ProductRepositoryImpl
 from src.stock.app.queries import StockQueries
-from src.stock.domain.repositories import StockRepository
+from src.stock.app.repositories import StockRepository
 from src.stock.infra.controllers import StockController
 from src.stock.infra.repositories import StockRepositoryImpl
 
@@ -95,6 +95,15 @@ def init_use_cases() -> None:
         ),
         scope=LifetimeScope.SCOPED,
     )
+    container.register(
+        FilterMovementsUseCase,
+        factory=lambda c, scope_id=None: FilterMovementsUseCase(
+            c.resolve_scoped(MovementRepository, scope_id)
+            if scope_id
+            else c.resolve(MovementRepository)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
 
 
 def init_queries() -> None:
@@ -158,7 +167,10 @@ def init_controllers() -> None:
         factory=lambda c, scope_id=None: MovementController(
             c.resolve_scoped(CreateMovementUseCase, scope_id)
             if scope_id
-            else c.resolve(CreateMovementUseCase)
+            else c.resolve(CreateMovementUseCase),
+            c.resolve_scoped(FilterMovementsUseCase, scope_id)
+            if scope_id
+            else c.resolve(FilterMovementsUseCase),
         ),
         scope=LifetimeScope.SCOPED,
     )
