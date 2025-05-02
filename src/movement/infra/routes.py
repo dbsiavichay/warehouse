@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from src import get_movement_controller
-from src.movement.domain.entities import Movement
-from src.movement.infra.validators import MovementSchema
+from src.movement.infra.validators import MovementInput, MovementResponse
 
 from .controllers import MovementController
 
@@ -14,14 +13,14 @@ class MovementRouter:
 
     def _setup_routes(self):
         """Sets up all the routes for the router."""
-        self.router.post("", response_model=Movement, summary="Save movement")(
+        self.router.post("", response_model=MovementResponse, summary="Save movement")(
             self.create
         )
 
     def create(
         self,
-        new_movement: MovementSchema,
+        new_movement: MovementInput,
         movement_controller: MovementController = Depends(get_movement_controller),
-    ) -> Movement:
+    ) -> MovementResponse:
         """Save a new movement."""
         return movement_controller.create(new_movement)

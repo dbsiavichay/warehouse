@@ -1,15 +1,20 @@
 from typing import List
 
-from src.stock.domain.entities import Stock
 from src.stock.domain.repositories import StockRepository
+
+from .types import StockOutput
 
 
 class StockQueries:
     def __init__(self, repo: StockRepository):
         self.repo = repo
 
-    def get_by_product_id(self, id: int) -> Stock | None:
-        return self.repo.get_by_product_id(id)
+    def get_by_product_id(self, id: int) -> StockOutput | None:
+        stock = self.repo.get_by_product_id(id)
+        if stock is None:
+            return None
+        return stock.dict()
 
-    def get_all(self) -> List[Stock]:
-        return self.repo.get_all()
+    def get_all(self) -> List[StockOutput]:
+        stocks = self.repo.get_all()
+        return [stock.dict() for stock in stocks]

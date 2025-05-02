@@ -1,24 +1,20 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from src.movement.domain.entities import Movement
+from src.core.domain.entities import Entity
 from src.stock.domain.exceptions import InsufficientStock
 
 
 @dataclass
-class Stock:
+class Stock(Entity):
     product_id: int
     quantity: int
     id: Optional[int] = None
     location: Optional[str] = None
 
-    @classmethod
-    def from_movement(cls, movement: Movement):
-        return cls(product_id=movement.product_id, quantity=movement.quantity)
-
-    def update(self, movement: Movement):
-        new_quantity = self.quantity + movement.quantity
+    def update_quantity(self, quantity: int):
+        new_quantity = self.quantity + quantity
         if new_quantity < 0:
-            raise InsufficientStock(self.product_id, movement.quantity)
+            raise InsufficientStock(self.product_id, quantity)
         self.quantity = new_quantity
         return self

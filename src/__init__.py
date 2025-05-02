@@ -4,12 +4,16 @@ from fastapi import Depends
 
 from config import config
 from src.core.infra.di import DependencyContainer, LifetimeScope
-from src.movement.app.commands import MovementCommands
+from src.movement.app.use_cases import CreateMovementUseCase
 from src.movement.domain.repositories import MovementRepository
 from src.movement.infra.controllers import MovementController
 from src.movement.infra.repositories import MovementRepositoryImpl
-from src.product.app.commands import ProductCommands
 from src.product.app.queries import ProductQueries
+from src.product.app.use_cases import (
+    CreateProductUseCase,
+    DeleteProductUseCase,
+    UpdateProductUseCase,
+)
 from src.product.domain.repositories import ProductRepository
 from src.product.infra.controllers import ProductController
 from src.product.infra.repositories import ProductRepositoryImpl
@@ -49,6 +53,50 @@ def init_repositories() -> None:
     )
 
 
+def init_use_cases() -> None:
+    """Initializes all use cases."""
+    # Register the product use cases
+    container.register(
+        CreateProductUseCase,
+        factory=lambda c, scope_id=None: CreateProductUseCase(
+            c.resolve_scoped(ProductRepository, scope_id)
+            if scope_id
+            else c.resolve(ProductRepository)
+        ),
+    )
+    container.register(
+        UpdateProductUseCase,
+        factory=lambda c, scope_id=None: UpdateProductUseCase(
+            c.resolve_scoped(ProductRepository, scope_id)
+            if scope_id
+            else c.resolve(ProductRepository)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    container.register(
+        DeleteProductUseCase,
+        factory=lambda c, scope_id=None: DeleteProductUseCase(
+            c.resolve_scoped(ProductRepository, scope_id)
+            if scope_id
+            else c.resolve(ProductRepository)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    # Register movement use cases
+    container.register(
+        CreateMovementUseCase,
+        factory=lambda c, scope_id=None: CreateMovementUseCase(
+            c.resolve_scoped(MovementRepository, scope_id)
+            if scope_id
+            else c.resolve(MovementRepository),
+            c.resolve_scoped(StockRepository, scope_id)
+            if scope_id
+            else c.resolve(StockRepository),
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+
+
 def init_queries() -> None:
     """Initializes all queries."""
     # Register the product queries
@@ -73,42 +121,21 @@ def init_queries() -> None:
     )
 
 
-def init_commands() -> None:
-    """Initializes all commands."""
-    # Register the product commands
-    container.register(
-        ProductCommands,
-        factory=lambda c, scope_id=None: ProductCommands(
-            c.resolve_scoped(ProductRepository, scope_id)
-            if scope_id
-            else c.resolve(ProductRepository)
-        ),
-        scope=LifetimeScope.SCOPED,
-    )
-    # Register the movement commands
-    container.register(
-        MovementCommands,
-        factory=lambda c, scope_id=None: MovementCommands(
-            c.resolve_scoped(MovementRepository, scope_id)
-            if scope_id
-            else c.resolve(MovementRepository),
-            c.resolve_scoped(StockRepository, scope_id)
-            if scope_id
-            else c.resolve(StockRepository),
-        ),
-        scope=LifetimeScope.SCOPED,
-    )
-
-
 def init_controllers() -> None:
     """Initializes all controllers."""
     # Register the product controller
     container.register(
         ProductController,
         factory=lambda c, scope_id=None: ProductController(
-            c.resolve_scoped(ProductCommands, scope_id)
+            c.resolve_scoped(CreateProductUseCase, scope_id)
             if scope_id
-            else c.resolve(ProductCommands),
+            else c.resolve(CreateProductUseCase),
+            c.resolve_scoped(UpdateProductUseCase, scope_id)
+            if scope_id
+            else c.resolve(UpdateProductUseCase),
+            c.resolve_scoped(DeleteProductUseCase, scope_id)
+            if scope_id
+            else c.resolve(DeleteProductUseCase),
             c.resolve_scoped(ProductQueries, scope_id)
             if scope_id
             else c.resolve(ProductQueries),
@@ -129,9 +156,9 @@ def init_controllers() -> None:
     container.register(
         MovementController,
         factory=lambda c, scope_id=None: MovementController(
-            c.resolve_scoped(MovementCommands, scope_id)
+            c.resolve_scoped(CreateMovementUseCase, scope_id)
             if scope_id
-            else c.resolve(MovementCommands)
+            else c.resolve(CreateMovementUseCase)
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -146,8 +173,8 @@ def initialize() -> None:
     container.configure_db(db_connection_string)
 
     init_repositories()
+    init_use_cases()
     init_queries()
-    init_commands()
     init_controllers()
 
 

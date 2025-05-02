@@ -3,9 +3,9 @@ from typing import List
 from fastapi import APIRouter, Depends
 
 from src import get_stock_controller
-from src.stock.domain.entities import Stock
 
 from .controllers import StockController
+from .validators import StockResponse
 
 
 class StockRouter:
@@ -16,11 +16,13 @@ class StockRouter:
     def _setup_routes(self):
         """Sets up all the routes for the router."""
         self.router.get(
-            "/{product_id}", response_model=Stock, summary="Get stock by product_id"
+            "/{product_id}",
+            response_model=StockResponse,
+            summary="Get stock by product_id",
         )(self.get_by_product_id)
-        self.router.get("", response_model=List[Stock], summary="Get all stocks")(
-            self.get_all
-        )
+        self.router.get(
+            "", response_model=List[StockResponse], summary="Get all stocks"
+        )(self.get_all)
 
     def get_by_product_id(
         self,

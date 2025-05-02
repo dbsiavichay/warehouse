@@ -1,13 +1,14 @@
-from src.movement.app.commands import MovementCommands
-from src.movement.domain.entities import Movement
+from src.movement.app.use_cases import CreateMovementUseCase
 
-from .validators import MovementSchema
+from .validators import MovementInput, MovementResponse
 
 
 class MovementController:
-    def __init__(self, movement_commands: MovementCommands):
-        self.movement_commands = movement_commands
+    def __init__(self, create_movement: CreateMovementUseCase):
+        self.create_movement = create_movement
 
-    def create(self, new_movement: MovementSchema) -> Movement:
-        movement = Movement(**new_movement.model_dump(exclude_none=True))
-        return self.movement_commands.create(movement)
+    def create(self, new_movement: MovementInput) -> MovementResponse:
+        movement = self.create_movement.execute(
+            new_movement.model_dump(exclude_none=True)
+        )
+        return MovementResponse.model_validate(movement)
