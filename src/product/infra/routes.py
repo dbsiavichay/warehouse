@@ -1,8 +1,9 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 
 from src import get_product_controller
-from src.product.domain.entities import Product
-from src.product.infra.validators import ProductSchema
+from src.product.infra.validators import ProductInput, ProductResponse
 
 from .controllers import ProductController
 
@@ -14,19 +15,23 @@ class ProductRouter:
 
     def _setup_routes(self):
         """Sets up all the routes for the router."""
-        self.router.post("", response_model=Product, summary="Save product")(
+        self.router.post("", response_model=ProductResponse, summary="Save product")(
             self.create
         )
-        self.router.put("/{id}", response_model=Product, summary="Update product")(
-            self.update
-        )
+        self.router.put(
+            "/{id}", response_model=ProductResponse, summary="Update product"
+        )(self.update)
         self.router.delete("/{id}", summary="Delete product")(self.delete)
-        self.router.get("", summary="Get all products")(self.get_all)
-        self.router.get("/{id}", summary="Get product by ID")(self.get_by_id)
+        self.router.get(
+            "", response_model=List[ProductResponse], summary="Get all products"
+        )(self.get_all)
+        self.router.get(
+            "/{id}", response_model=ProductResponse, summary="Get product by ID"
+        )(self.get_by_id)
 
     def create(
         self,
-        new_product: ProductSchema,
+        new_product: ProductInput,
         controller: ProductController = Depends(get_product_controller),
     ):
         """Saves a product."""
@@ -35,7 +40,7 @@ class ProductRouter:
     def update(
         self,
         id: int,
-        product: ProductSchema,
+        product: ProductInput,
         controller: ProductController = Depends(get_product_controller),
     ):
         """Updates a product."""

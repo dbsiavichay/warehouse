@@ -6,12 +6,14 @@ from src.movement.domain.constants import MovementType
 from src.movement.domain.exceptions import InvalidMovementTypeException
 
 
-class MovementSchema(BaseModel):
+class MovementBase(BaseModel):
     product_id: int
     quantity: int
     type: MovementType
     reason: Optional[str] = None
 
+
+class MovementInput(MovementBase):
     @field_validator("quantity", mode="after")
     @classmethod
     def validate_quantity_not_zero(cls, v):
@@ -30,3 +32,7 @@ class MovementSchema(BaseModel):
                 "La cantidad debe ser negativa para movimientos de salida"
             )
         return self
+
+
+class MovementResponse(MovementBase):
+    id: int

@@ -6,7 +6,15 @@ from src.product.domain.entities import Product
 
 class ProductRepository(ABC):
     @abstractmethod
-    def save(self, product: Product) -> Product:
+    def create(self, product: Product) -> Product:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update(self, product: Product) -> Product:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete(self, id: int) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -15,8 +23,4 @@ class ProductRepository(ABC):
 
     @abstractmethod
     def get_by_id(self, id: int) -> Product | None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def delete(self, id: int) -> None:
         raise NotImplementedError
