@@ -20,7 +20,7 @@ tests:  ## Run tests
 lint:  ## Fix linter errors
 	source .venv/bin/activate && black . && isort . --profile black && flake8 .	
 
-migration:  ## Create a new migration with Alembic
+migrations:  ## Create a new migration with Alembic
 	docker compose run --no-deps --rm api alembic revision --autogenerate -m "$(m)"
 
 upgrade:  ## Apply all pending migrations with Alembic

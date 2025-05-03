@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.infra.db import Base
@@ -14,10 +14,17 @@ class ProductModel(Base):
     name: Mapped[str] = mapped_column(String(128), nullable=False)
     sku: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(String(255))
-    category: Mapped[Optional[str]] = mapped_column(String(128))
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.now
     )
-    movements: Mapped[list["MovementModel"]] = relationship(
+
+    category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"))
+    category: Mapped["CategoryModel"] = relationship(  # NOQA: F821
+        back_populates="products"
+    )
+    movements: Mapped[list["MovementModel"]] = relationship(  # NOQA: F821
+        back_populates="product", cascade="all, delete-orphan"
+    )
+    stocks: Mapped[list["StockModel"]] = relationship(  # NOQA: F821
         back_populates="product", cascade="all, delete-orphan"
     )
