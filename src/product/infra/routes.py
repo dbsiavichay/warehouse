@@ -2,10 +2,55 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 
-from src import get_product_controller
-from src.product.infra.validators import ProductInput, ProductResponse
+from src import get_category_controller, get_product_controller
+from src.product.infra.controllers import CategoryController, ProductController
+from src.product.infra.validators import (
+    CategoryInput,
+    CategoryResponse,
+    ProductInput,
+    ProductResponse,
+)
 
-from .controllers import ProductController
+
+class CategoryRouter:
+    def __init__(self):
+        self.router = APIRouter()
+        self._setup_routes()
+
+    def _setup_routes(self):
+        """Sets up all the routes for the router."""
+        self.router.post("", response_model=CategoryResponse, summary="Save category")(
+            self.create
+        )
+        self.router.put(
+            "/{id}", response_model=CategoryResponse, summary="Update category"
+        )(self.update)
+        self.router.delete("/{id}", summary="Delete category")(self.delete)
+
+    def create(
+        self,
+        new_category: CategoryInput,
+        controller: CategoryController = Depends(get_category_controller),
+    ):
+        """Saves a category."""
+        return controller.create(new_category)
+
+    def update(
+        self,
+        id: int,
+        category: CategoryInput,
+        controller: CategoryController = Depends(get_category_controller),
+    ):
+        """Updates a category."""
+        return controller.update(id, category)
+
+    def delete(
+        self,
+        id: int,
+        controller: CategoryController = Depends(get_category_controller),
+    ):
+        """Deletes a category."""
+        return controller.delete(id)
 
 
 class ProductRouter:

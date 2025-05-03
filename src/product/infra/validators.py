@@ -4,6 +4,11 @@ from pydantic import BaseModel
 
 
 # Inputs
+class CategoryInput(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+
 class ProductInput(BaseModel):
     name: str
     sku: str
@@ -12,5 +17,9 @@ class ProductInput(BaseModel):
 
 
 # Responses
+class CategoryResponse(CategoryInput):
+    id: int
+
+
 class ProductResponse(ProductInput):
     id: int
