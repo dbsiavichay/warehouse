@@ -24,7 +24,7 @@ class MovementInput(MovementBase):
         return v
 
     @model_validator(mode="after")
-    def validate_quantity_by_movement_type(self) -> "MovementSchema":
+    def validate_quantity_by_movement_type(self) -> "MovementInput":
         if self.type == MovementType.IN and self.quantity < 0:
             raise InvalidMovementTypeException(
                 "La cantidad debe ser positiva para movimientos de entrada"
