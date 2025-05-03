@@ -3,12 +3,47 @@ from typing import List
 from src.core.infra.exceptions import NotFoundException
 from src.product.app.queries import ProductQueries
 from src.product.app.use_cases import (
+    CreateCategoryUseCase,
     CreateProductUseCase,
+    DeleteCategoryUseCase,
     DeleteProductUseCase,
+    UpdateCategoryUseCase,
     UpdateProductUseCase,
 )
 from src.product.domain.entities import Product
-from src.product.infra.validators import ProductInput, ProductResponse
+from src.product.infra.validators import (
+    CategoryInput,
+    CategoryResponse,
+    ProductInput,
+    ProductResponse,
+)
+
+
+class CategoryController:
+    def __init__(
+        self,
+        create_category: CreateCategoryUseCase,
+        update_category: UpdateCategoryUseCase,
+        delete_category: DeleteCategoryUseCase,
+    ):
+        self.create_category = create_category
+        self.update_category = update_category
+        self.delete_category = delete_category
+
+    def create(self, new_category: CategoryInput) -> CategoryResponse:
+        category = self.create_category.execute(
+            new_category.model_dump(exclude_none=True)
+        )
+        return CategoryResponse.model_validate(category)
+
+    def update(self, id: int, category: CategoryInput) -> Product:
+        category = self.update_category.execute(
+            id, category.model_dump(exclude_none=True)
+        )
+        return CategoryResponse.model_validate(category)
+
+    def delete(self, id: int) -> None:
+        self.delete_category.execute(id)
 
 
 class ProductController:

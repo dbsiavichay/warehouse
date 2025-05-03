@@ -6,10 +6,17 @@ from src.core.domain.entities import Entity
 
 
 @dataclass
+class Category(Entity):
+    name: str
+    description: Optional[str]
+    id: Optional[int] = None
+
+
+@dataclass
 class Product(Entity):
     name: str
     sku: str
     id: Optional[int] = None
     description: Optional[str] = None
-    category: Optional[str] = None
+    category_id: Optional[int] = None
     created_at: Optional[datetime] = None

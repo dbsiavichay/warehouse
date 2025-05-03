@@ -7,9 +7,10 @@ from fastapi.responses import RedirectResponse
 from src import initialize
 from src.core.infra.middlewares import ErrorHandlingMiddleware
 from src.movement.infra.routes import MovementRouter
-from src.product.infra.routes import ProductRouter
+from src.product.infra.routes import CategoryRouter, ProductRouter
 from src.stock.infra.routes import StockRouter
 
+category_router = CategoryRouter()
 product_router = ProductRouter()
 stock_router = StockRouter()
 movement_router = MovementRouter()
@@ -33,6 +34,7 @@ app.add_middleware(
 )
 app.add_middleware(ErrorHandlingMiddleware)
 
+app.include_router(category_router.router, prefix="/categories", tags=["categories"])
 app.include_router(product_router.router, prefix="/products", tags=["products"])
 app.include_router(stock_router.router, prefix="/stock", tags=["stock"])
 app.include_router(movement_router.router, prefix="/movements", tags=["movements"])

@@ -1,7 +1,6 @@
+from src.product.app.repositories import ProductRepository
 from src.product.app.types import ProductInput, ProductOutput
 from src.product.domain.entities import Product
-
-from .repositories import ProductRepository
 
 
 class CreateProductUseCase:

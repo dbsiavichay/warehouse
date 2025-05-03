@@ -9,14 +9,17 @@ from src.movement.app.use_cases import CreateMovementUseCase, FilterMovementsUse
 from src.movement.infra.controllers import MovementController
 from src.movement.infra.repositories import MovementRepositoryImpl
 from src.product.app.queries import ProductQueries
-from src.product.app.repositories import ProductRepository
+from src.product.app.repositories import CategoryRepository, ProductRepository
 from src.product.app.use_cases import (
+    CreateCategoryUseCase,
     CreateProductUseCase,
+    DeleteCategoryUseCase,
     DeleteProductUseCase,
+    UpdateCategoryUseCase,
     UpdateProductUseCase,
 )
-from src.product.infra.controllers import ProductController
-from src.product.infra.repositories import ProductRepositoryImpl
+from src.product.infra.controllers import CategoryController, ProductController
+from src.product.infra.repositories import CategoryRepositoryImpl, ProductRepositoryImpl
 from src.stock.app.queries import StockQueries
 from src.stock.app.repositories import StockRepository
 from src.stock.infra.controllers import StockController
@@ -27,6 +30,14 @@ container = DependencyContainer()
 
 def init_repositories() -> None:
     """Initializes all repositories."""
+    # Register the category repository
+    container.register(
+        CategoryRepository,
+        factory=lambda c, scope_id=None: CategoryRepositoryImpl(
+            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session()
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
     # Register the product repository
     container.register(
         ProductRepository,
@@ -55,6 +66,33 @@ def init_repositories() -> None:
 
 def init_use_cases() -> None:
     """Initializes all use cases."""
+    # Register the category use cases
+    container.register(
+        CreateCategoryUseCase,
+        factory=lambda c, scope_id=None: CreateCategoryUseCase(
+            c.resolve_scoped(CategoryRepository, scope_id)
+            if scope_id
+            else c.resolve(CategoryRepository)
+        ),
+    )
+    container.register(
+        UpdateCategoryUseCase,
+        factory=lambda c, scope_id=None: UpdateCategoryUseCase(
+            c.resolve_scoped(CategoryRepository, scope_id)
+            if scope_id
+            else c.resolve(CategoryRepository)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    container.register(
+        DeleteCategoryUseCase,
+        factory=lambda c, scope_id=None: DeleteCategoryUseCase(
+            c.resolve_scoped(CategoryRepository, scope_id)
+            if scope_id
+            else c.resolve(CategoryRepository)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
     # Register the product use cases
     container.register(
         CreateProductUseCase,
@@ -132,6 +170,21 @@ def init_queries() -> None:
 
 def init_controllers() -> None:
     """Initializes all controllers."""
+    # Register the category controller
+    container.register(
+        CategoryController,
+        factory=lambda c, scope_id=None: CategoryController(
+            c.resolve_scoped(CreateCategoryUseCase, scope_id)
+            if scope_id
+            else c.resolve(CreateCategoryUseCase),
+            c.resolve_scoped(UpdateCategoryUseCase, scope_id)
+            if scope_id
+            else c.resolve(UpdateCategoryUseCase),
+            c.resolve_scoped(DeleteCategoryUseCase, scope_id)
+            if scope_id
+            else c.resolve(DeleteCategoryUseCase),
+        ),
+    )
     # Register the product controller
     container.register(
         ProductController,
@@ -193,6 +246,19 @@ def initialize() -> None:
 # Function to generate a unique scope ID for each request
 def get_request_scope_id():
     return str(uuid.uuid4())
+
+
+# Dependency to get the category controller in a request scope
+def get_category_controller(
+    scope_id: str = Depends(get_request_scope_id),
+) -> CategoryController:
+    """Gets the category controller for a specific request."""
+    controller = container.resolve_scoped(CategoryController, scope_id)
+    try:
+        yield controller
+    finally:
+        # Close the scope when the request ends
+        container.close_scope(scope_id)
 
 
 # Dependency to get the product controller in a request scope

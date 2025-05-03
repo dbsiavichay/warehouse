@@ -1,26 +1,10 @@
-from abc import ABC, abstractmethod
-from typing import List
-
-from src.product.domain.entities import Product
+from src.core.app.repositories import Repository
+from src.product.domain.entities import Category, Product
 
 
-class ProductRepository(ABC):
-    @abstractmethod
-    def create(self, product: Product) -> Product:
-        raise NotImplementedError
+class CategoryRepository(Repository[Category]):
+    pass
 
-    @abstractmethod
-    def update(self, product: Product) -> Product:
-        raise NotImplementedError
 
-    @abstractmethod
-    def delete(self, id: int) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_all(self) -> List[Product]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def get_by_id(self, id: int) -> Product | None:
-        raise NotImplementedError
+class ProductRepository(Repository[Product]):
+    pass
