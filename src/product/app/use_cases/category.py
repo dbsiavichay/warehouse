@@ -1,3 +1,5 @@
+from typing import Optional
+
 from src.product.app.repositories import CategoryRepository
 from src.product.app.types import CategoryInput, CategoryOutput
 from src.product.domain.entities import Category
@@ -29,3 +31,23 @@ class DeleteCategoryUseCase:
 
     def execute(self, id: int) -> None:
         self.repo.delete(id)
+
+
+class GetAllCategoriesUseCase:
+    def __init__(self, repo: CategoryRepository):
+        self.repo = repo
+
+    def execute(self) -> list[CategoryOutput]:
+        categories = self.repo.get_all()
+        return [category.dict() for category in categories]
+
+
+class GetCategoryUseCase:
+    def __init__(self, repo: CategoryRepository):
+        self.repo = repo
+
+    def execute(self, id: int) -> Optional[CategoryOutput]:
+        category = self.repo.get_by_id(id)
+        if category is None:
+            return None
+        return category.dict()

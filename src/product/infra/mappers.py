@@ -1,21 +1,23 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
+from src.core.infra.mappers import Mapper
 from src.product.domain.entities import Category, Product
-from src.product.infra.models import ProductModel
+from src.product.infra.models import CategoryModel, ProductModel
 
 
-class CategoryMapper:
-    @staticmethod
-    def to_entity(model: Category) -> Category:
+class CategoryMapper(Mapper[Category, CategoryModel]):
+    def to_entity(self, model: CategoryModel | None) -> Optional[Category]:
         """Converts an infrastructure model to a domain entity"""
+        if not model:
+            return None
+
         return Category(
             id=model.id,
             name=model.name,
             description=model.description,
         )
 
-    @staticmethod
-    def to_dict(entity: Category) -> Dict[str, Any]:
+    def to_dict(self, entity: Category) -> Dict[str, Any]:
         """Converts a domain entity to a dictionary for creating a model"""
         # Exclude id and created_at if they are None (for creation)
         result = {

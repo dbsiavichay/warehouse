@@ -26,6 +26,12 @@ class CategoryRouter:
             "/{id}", response_model=CategoryResponse, summary="Update category"
         )(self.update)
         self.router.delete("/{id}", summary="Delete category")(self.delete)
+        self.router.get(
+            "", response_model=List[CategoryResponse], summary="Get all categories"
+        )(self.get_all)
+        self.router.get(
+            "/{id}", response_model=CategoryResponse, summary="Get category by ID"
+        )(self.get_by_id)
 
     def create(
         self,
@@ -51,6 +57,18 @@ class CategoryRouter:
     ):
         """Deletes a category."""
         return controller.delete(id)
+
+    def get_all(
+        self, controller: CategoryController = Depends(get_category_controller)
+    ):
+        """Retrieves all categories."""
+        return controller.get_all()
+
+    def get_by_id(
+        self, id: int, controller: CategoryController = Depends(get_category_controller)
+    ):
+        """Retrieves a specific category by its ID."""
+        return controller.get_by_id(id)
 
 
 class ProductRouter:
