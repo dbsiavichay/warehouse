@@ -18,7 +18,12 @@ from src.product.app.use_cases import (
     UpdateCategoryUseCase,
     UpdateProductUseCase,
 )
+from src.product.app.use_cases.category import (
+    GetAllCategoriesUseCase,
+    GetCategoryUseCase,
+)
 from src.product.infra.controllers import CategoryController, ProductController
+from src.product.infra.mappers import CategoryMapper
 from src.product.infra.repositories import CategoryRepositoryImpl, ProductRepositoryImpl
 from src.stock.app.queries import StockQueries
 from src.stock.app.repositories import StockRepository
@@ -28,13 +33,24 @@ from src.stock.infra.repositories import StockRepositoryImpl
 container = DependencyContainer()
 
 
+def init_mappers() -> None:
+    """Initializes all mappers."""
+    # Register the category mapper
+    container.register(
+        CategoryMapper,
+        factory=lambda c: CategoryMapper(),
+        scope=LifetimeScope.SINGLETON,
+    )
+
+
 def init_repositories() -> None:
     """Initializes all repositories."""
     # Register the category repository
     container.register(
         CategoryRepository,
         factory=lambda c, scope_id=None: CategoryRepositoryImpl(
-            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session()
+            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session(),
+            c.resolve(CategoryMapper),
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -87,6 +103,24 @@ def init_use_cases() -> None:
     container.register(
         DeleteCategoryUseCase,
         factory=lambda c, scope_id=None: DeleteCategoryUseCase(
+            c.resolve_scoped(CategoryRepository, scope_id)
+            if scope_id
+            else c.resolve(CategoryRepository)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    container.register(
+        GetAllCategoriesUseCase,
+        factory=lambda c, scope_id=None: GetAllCategoriesUseCase(
+            c.resolve_scoped(CategoryRepository, scope_id)
+            if scope_id
+            else c.resolve(CategoryRepository)
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    container.register(
+        GetCategoryUseCase,
+        factory=lambda c, scope_id=None: GetCategoryUseCase(
             c.resolve_scoped(CategoryRepository, scope_id)
             if scope_id
             else c.resolve(CategoryRepository)
@@ -183,6 +217,12 @@ def init_controllers() -> None:
             c.resolve_scoped(DeleteCategoryUseCase, scope_id)
             if scope_id
             else c.resolve(DeleteCategoryUseCase),
+            c.resolve_scoped(GetAllCategoriesUseCase, scope_id)
+            if scope_id
+            else c.resolve(GetAllCategoriesUseCase),
+            c.resolve_scoped(GetCategoryUseCase, scope_id)
+            if scope_id
+            else c.resolve(GetCategoryUseCase),
         ),
     )
     # Register the product controller
@@ -237,6 +277,7 @@ def initialize() -> None:
         raise ValueError("Database connection string not found in environment")
     container.configure_db(db_connection_string)
 
+    init_mappers()
     init_repositories()
     init_use_cases()
     init_queries()
