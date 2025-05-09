@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 # Inputs
@@ -14,10 +14,11 @@ class ProductInput(BaseModel):
     sku: str
     description: Optional[str] = None
     category_id: Optional[int] = Field(
-        default=None,
+        None,
         ge=1,
         description="Category ID (must be a positive integer)",
-        alias="categoryId",
+        validation_alias=AliasChoices("category_id", "categoryId"),
+        serialization_alias="categoryId",
     )
 
 

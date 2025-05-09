@@ -1,9 +1,17 @@
 from .category import (
     CreateCategoryUseCase,
     DeleteCategoryUseCase,
+    GetAllCategoriesUseCase,
+    GetCategoryByIdUseCase,
     UpdateCategoryUseCase,
 )
-from .product import CreateProductUseCase, DeleteProductUseCase, UpdateProductUseCase
+from .product import (
+    CreateProductUseCase,
+    DeleteProductUseCase,
+    GetAllProductsUseCase,
+    GetProductByIdUseCase,
+    UpdateProductUseCase,
+)
 
 __all__ = [
     "CreateProductUseCase",
@@ -12,4 +20,8 @@ __all__ = [
     "CreateCategoryUseCase",
     "UpdateCategoryUseCase",
     "DeleteCategoryUseCase",
+    "GetAllProductsUseCase",
+    "GetProductByIdUseCase",
+    "GetAllCategoriesUseCase",
+    "GetCategoryByIdUseCase",
 ]

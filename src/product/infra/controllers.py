@@ -1,18 +1,17 @@
 from typing import List
 
 from src.core.infra.exceptions import NotFoundException
-from src.product.app.queries import ProductQueries
 from src.product.app.use_cases import (
     CreateCategoryUseCase,
     CreateProductUseCase,
     DeleteCategoryUseCase,
     DeleteProductUseCase,
+    GetAllCategoriesUseCase,
+    GetAllProductsUseCase,
+    GetCategoryByIdUseCase,
+    GetProductByIdUseCase,
     UpdateCategoryUseCase,
     UpdateProductUseCase,
-)
-from src.product.app.use_cases.category import (
-    GetAllCategoriesUseCase,
-    GetCategoryUseCase,
 )
 from src.product.domain.entities import Product
 from src.product.infra.validators import (
@@ -30,7 +29,7 @@ class CategoryController:
         update_category: UpdateCategoryUseCase,
         delete_category: DeleteCategoryUseCase,
         get_all_categories: GetAllCategoriesUseCase,
-        get_category_by_id: GetCategoryUseCase,
+        get_category_by_id: GetCategoryByIdUseCase,
     ):
         self.create_category = create_category
         self.update_category = update_category
@@ -70,12 +69,14 @@ class ProductController:
         create_product: CreateProductUseCase,
         update_product: UpdateProductUseCase,
         delete_product: DeleteProductUseCase,
-        product_queries: ProductQueries,
+        get_all_products: GetAllProductsUseCase,
+        get_product_by_id: GetProductByIdUseCase,
     ):
         self.create_product = create_product
         self.update_product = update_product
         self.delete_product = delete_product
-        self.product_queries = product_queries
+        self.get_all_products = get_all_products
+        self.get_product_by_id = get_product_by_id
 
     def create(self, new_product: ProductInput) -> ProductResponse:
         product = self.create_product.execute(new_product.model_dump(exclude_none=True))
@@ -89,11 +90,11 @@ class ProductController:
         self.delete_product.execute(id)
 
     def get_all(self) -> List[ProductResponse]:
-        products = self.product_queries.get_all()
+        products = self.get_all_products.execute()
         return [ProductResponse.model_validate(product) for product in products]
 
     def get_by_id(self, id: int) -> ProductResponse:
-        product = self.product_queries.get_by_id(id)
+        product = self.get_product_by_id.execute(id)
         if product is None:
             raise NotFoundException("Product not found")
         return ProductResponse.model_validate(product)

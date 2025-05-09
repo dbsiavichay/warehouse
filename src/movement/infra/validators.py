@@ -1,15 +1,22 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import AliasChoices, BaseModel, Field, field_validator, model_validator
 
+from src.core.infra.validators import QueryParams
 from src.movement.domain.constants import MovementType
 from src.movement.domain.exceptions import InvalidMovementTypeException
 
 
 class MovementBase(BaseModel):
-    product_id: int
-    quantity: int
+    product_id: int = Field(
+        ...,
+        ge=1,
+        description="Product ID",
+        validation_alias=AliasChoices("productId", "product_id"),
+        serialization_alias="productId",
+    )
+    quantity: int = Field(..., ge=1, description="Quantity")
     type: MovementType
     reason: Optional[str] = None
     date: Optional[datetime] = None
@@ -40,11 +47,12 @@ class MovementResponse(MovementBase):
     id: int
 
 
-class MovementQueryParams(BaseModel):
-    product_id: Optional[int] = None
+class MovementQueryParams(QueryParams):
+    product_id: Optional[int] = Field(
+        None,
+        ge=1,
+        alias="productId",
+    )
     type: Optional[MovementType] = None
-    from_date: Optional[datetime] = None
-    to_date: Optional[datetime] = None
-
-    limit: Optional[int] = Field(100, ge=1, le=1000)
-    offset: Optional[int] = Field(0, ge=0)
+    from_date: Optional[datetime] = Field(None, alias="fromDate")
+    to_date: Optional[datetime] = Field(None, alias="toDate")

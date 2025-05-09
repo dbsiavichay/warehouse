@@ -4,30 +4,32 @@ from fastapi import Depends
 
 from config import config
 from src.core.infra.di import DependencyContainer, LifetimeScope
-from src.movement.app.repositories import MovementRepository
+from src.core.infra.repositories import Repository
 from src.movement.app.use_cases import CreateMovementUseCase, FilterMovementsUseCase
+from src.movement.domain.entities import Movement
 from src.movement.infra.controllers import MovementController
+from src.movement.infra.mappers import MovementMapper
 from src.movement.infra.repositories import MovementRepositoryImpl
-from src.product.app.queries import ProductQueries
-from src.product.app.repositories import CategoryRepository, ProductRepository
 from src.product.app.use_cases import (
     CreateCategoryUseCase,
     CreateProductUseCase,
     DeleteCategoryUseCase,
     DeleteProductUseCase,
+    GetAllCategoriesUseCase,
+    GetAllProductsUseCase,
+    GetCategoryByIdUseCase,
+    GetProductByIdUseCase,
     UpdateCategoryUseCase,
     UpdateProductUseCase,
 )
-from src.product.app.use_cases.category import (
-    GetAllCategoriesUseCase,
-    GetCategoryUseCase,
-)
+from src.product.domain.entities import Category, Product
 from src.product.infra.controllers import CategoryController, ProductController
-from src.product.infra.mappers import CategoryMapper
+from src.product.infra.mappers import CategoryMapper, ProductMapper
 from src.product.infra.repositories import CategoryRepositoryImpl, ProductRepositoryImpl
-from src.stock.app.queries import StockQueries
-from src.stock.app.repositories import StockRepository
+from src.stock.app.use_cases import FilterStocksUseCase
+from src.stock.domain.entities import Stock
 from src.stock.infra.controllers import StockController
+from src.stock.infra.mappers import StockMapper
 from src.stock.infra.repositories import StockRepositoryImpl
 
 container = DependencyContainer()
@@ -35,10 +37,28 @@ container = DependencyContainer()
 
 def init_mappers() -> None:
     """Initializes all mappers."""
+    # Register the movement mapper
+    container.register(
+        MovementMapper,
+        factory=lambda c: MovementMapper(),
+        scope=LifetimeScope.SINGLETON,
+    )
     # Register the category mapper
     container.register(
         CategoryMapper,
         factory=lambda c: CategoryMapper(),
+        scope=LifetimeScope.SINGLETON,
+    )
+    # Register the product mapper
+    container.register(
+        ProductMapper,
+        factory=lambda c: ProductMapper(),
+        scope=LifetimeScope.SINGLETON,
+    )
+    # Register the stock mapper
+    container.register(
+        StockMapper,
+        factory=lambda c: StockMapper(),
         scope=LifetimeScope.SINGLETON,
     )
 
@@ -47,7 +67,7 @@ def init_repositories() -> None:
     """Initializes all repositories."""
     # Register the category repository
     container.register(
-        CategoryRepository,
+        Repository[Category],
         factory=lambda c, scope_id=None: CategoryRepositoryImpl(
             c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session(),
             c.resolve(CategoryMapper),
@@ -56,25 +76,28 @@ def init_repositories() -> None:
     )
     # Register the product repository
     container.register(
-        ProductRepository,
+        Repository[Product],
         factory=lambda c, scope_id=None: ProductRepositoryImpl(
-            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session()
+            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session(),
+            c.resolve(ProductMapper),
         ),
         scope=LifetimeScope.SCOPED,
     )
     # Register the stock repository
     container.register(
-        StockRepository,
+        Repository[Stock],
         factory=lambda c, scope_id=None: StockRepositoryImpl(
-            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session()
+            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session(),
+            c.resolve(StockMapper),
         ),
         scope=LifetimeScope.SCOPED,
     )
     # Register the movement repository
     container.register(
-        MovementRepository,
+        Repository[Movement],
         factory=lambda c, scope_id=None: MovementRepositoryImpl(
-            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session()
+            c.get_scoped_db_session(scope_id) if scope_id else c.get_db_session(),
+            c.resolve(MovementMapper),
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -86,44 +109,44 @@ def init_use_cases() -> None:
     container.register(
         CreateCategoryUseCase,
         factory=lambda c, scope_id=None: CreateCategoryUseCase(
-            c.resolve_scoped(CategoryRepository, scope_id)
+            c.resolve_scoped(Repository[Category], scope_id)
             if scope_id
-            else c.resolve(CategoryRepository)
+            else c.resolve(Repository[Category])
         ),
     )
     container.register(
         UpdateCategoryUseCase,
         factory=lambda c, scope_id=None: UpdateCategoryUseCase(
-            c.resolve_scoped(CategoryRepository, scope_id)
+            c.resolve_scoped(Repository[Category], scope_id)
             if scope_id
-            else c.resolve(CategoryRepository)
+            else c.resolve(Repository[Category])
         ),
         scope=LifetimeScope.SCOPED,
     )
     container.register(
         DeleteCategoryUseCase,
         factory=lambda c, scope_id=None: DeleteCategoryUseCase(
-            c.resolve_scoped(CategoryRepository, scope_id)
+            c.resolve_scoped(Repository[Category], scope_id)
             if scope_id
-            else c.resolve(CategoryRepository)
+            else c.resolve(Repository[Category])
         ),
         scope=LifetimeScope.SCOPED,
     )
     container.register(
         GetAllCategoriesUseCase,
         factory=lambda c, scope_id=None: GetAllCategoriesUseCase(
-            c.resolve_scoped(CategoryRepository, scope_id)
+            c.resolve_scoped(Repository[Category], scope_id)
             if scope_id
-            else c.resolve(CategoryRepository)
+            else c.resolve(Repository[Category])
         ),
         scope=LifetimeScope.SCOPED,
     )
     container.register(
-        GetCategoryUseCase,
-        factory=lambda c, scope_id=None: GetCategoryUseCase(
-            c.resolve_scoped(CategoryRepository, scope_id)
+        GetCategoryByIdUseCase,
+        factory=lambda c, scope_id=None: GetCategoryByIdUseCase(
+            c.resolve_scoped(Repository[Category], scope_id)
             if scope_id
-            else c.resolve(CategoryRepository)
+            else c.resolve(Repository[Category])
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -131,26 +154,44 @@ def init_use_cases() -> None:
     container.register(
         CreateProductUseCase,
         factory=lambda c, scope_id=None: CreateProductUseCase(
-            c.resolve_scoped(ProductRepository, scope_id)
+            c.resolve_scoped(Repository[Product], scope_id)
             if scope_id
-            else c.resolve(ProductRepository)
+            else c.resolve(Repository[Product])
         ),
     )
     container.register(
         UpdateProductUseCase,
         factory=lambda c, scope_id=None: UpdateProductUseCase(
-            c.resolve_scoped(ProductRepository, scope_id)
+            c.resolve_scoped(Repository[Product], scope_id)
             if scope_id
-            else c.resolve(ProductRepository)
+            else c.resolve(Repository[Product])
         ),
         scope=LifetimeScope.SCOPED,
     )
     container.register(
         DeleteProductUseCase,
         factory=lambda c, scope_id=None: DeleteProductUseCase(
-            c.resolve_scoped(ProductRepository, scope_id)
+            c.resolve_scoped(Repository[Product], scope_id)
             if scope_id
-            else c.resolve(ProductRepository)
+            else c.resolve(Repository[Product])
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    container.register(
+        GetAllProductsUseCase,
+        factory=lambda c, scope_id=None: GetAllProductsUseCase(
+            c.resolve_scoped(Repository[Product], scope_id)
+            if scope_id
+            else c.resolve(Repository[Product])
+        ),
+        scope=LifetimeScope.SCOPED,
+    )
+    container.register(
+        GetProductByIdUseCase,
+        factory=lambda c, scope_id=None: GetProductByIdUseCase(
+            c.resolve_scoped(Repository[Product], scope_id)
+            if scope_id
+            else c.resolve(Repository[Product])
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -158,45 +199,31 @@ def init_use_cases() -> None:
     container.register(
         CreateMovementUseCase,
         factory=lambda c, scope_id=None: CreateMovementUseCase(
-            c.resolve_scoped(MovementRepository, scope_id)
+            c.resolve_scoped(Repository[Movement], scope_id)
             if scope_id
-            else c.resolve(MovementRepository),
-            c.resolve_scoped(StockRepository, scope_id)
+            else c.resolve(Repository[Movement]),
+            c.resolve_scoped(Repository[Stock], scope_id)
             if scope_id
-            else c.resolve(StockRepository),
+            else c.resolve(Repository[Stock]),
         ),
         scope=LifetimeScope.SCOPED,
     )
     container.register(
         FilterMovementsUseCase,
         factory=lambda c, scope_id=None: FilterMovementsUseCase(
-            c.resolve_scoped(MovementRepository, scope_id)
+            c.resolve_scoped(Repository[Movement], scope_id)
             if scope_id
-            else c.resolve(MovementRepository)
+            else c.resolve(Repository[Movement])
         ),
         scope=LifetimeScope.SCOPED,
     )
-
-
-def init_queries() -> None:
-    """Initializes all queries."""
-    # Register the product queries
+    # Register the stock use cases
     container.register(
-        ProductQueries,
-        factory=lambda c, scope_id=None: ProductQueries(
-            c.resolve_scoped(ProductRepository, scope_id)
+        FilterStocksUseCase,
+        factory=lambda c, scope_id=None: FilterStocksUseCase(
+            c.resolve_scoped(Repository[Stock], scope_id)
             if scope_id
-            else c.resolve(ProductRepository)
-        ),
-        scope=LifetimeScope.SCOPED,
-    )
-    # Register the stock queries
-    container.register(
-        StockQueries,
-        factory=lambda c, scope_id=None: StockQueries(
-            c.resolve_scoped(StockRepository, scope_id)
-            if scope_id
-            else c.resolve(StockRepository)
+            else c.resolve(Repository[Stock])
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -220,9 +247,9 @@ def init_controllers() -> None:
             c.resolve_scoped(GetAllCategoriesUseCase, scope_id)
             if scope_id
             else c.resolve(GetAllCategoriesUseCase),
-            c.resolve_scoped(GetCategoryUseCase, scope_id)
+            c.resolve_scoped(GetCategoryByIdUseCase, scope_id)
             if scope_id
-            else c.resolve(GetCategoryUseCase),
+            else c.resolve(GetCategoryByIdUseCase),
         ),
     )
     # Register the product controller
@@ -238,9 +265,12 @@ def init_controllers() -> None:
             c.resolve_scoped(DeleteProductUseCase, scope_id)
             if scope_id
             else c.resolve(DeleteProductUseCase),
-            c.resolve_scoped(ProductQueries, scope_id)
+            c.resolve_scoped(GetAllProductsUseCase, scope_id)
             if scope_id
-            else c.resolve(ProductQueries),
+            else c.resolve(GetAllProductsUseCase),
+            c.resolve_scoped(GetProductByIdUseCase, scope_id)
+            if scope_id
+            else c.resolve(GetProductByIdUseCase),
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -248,9 +278,9 @@ def init_controllers() -> None:
     container.register(
         StockController,
         factory=lambda c, scope_id=None: StockController(
-            c.resolve_scoped(StockQueries, scope_id)
+            c.resolve_scoped(FilterStocksUseCase, scope_id)
             if scope_id
-            else c.resolve(StockQueries)
+            else c.resolve(FilterStocksUseCase)
         ),
         scope=LifetimeScope.SCOPED,
     )
@@ -280,7 +310,6 @@ def initialize() -> None:
     init_mappers()
     init_repositories()
     init_use_cases()
-    init_queries()
     init_controllers()
 
 

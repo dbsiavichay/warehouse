@@ -1,12 +1,12 @@
 from typing import Optional
 
-from src.product.app.repositories import CategoryRepository
+from src.core.app.repositories import Repository
 from src.product.app.types import CategoryInput, CategoryOutput
 from src.product.domain.entities import Category
 
 
 class CreateCategoryUseCase:
-    def __init__(self, repo: CategoryRepository):
+    def __init__(self, repo: Repository[Category]):
         self.repo = repo
 
     def execute(self, category_create: CategoryInput) -> CategoryOutput:
@@ -16,7 +16,7 @@ class CreateCategoryUseCase:
 
 
 class UpdateCategoryUseCase:
-    def __init__(self, repo: CategoryRepository):
+    def __init__(self, repo: Repository[Category]):
         self.repo = repo
 
     def execute(self, id: int, category_update: CategoryInput) -> CategoryOutput:
@@ -26,7 +26,7 @@ class UpdateCategoryUseCase:
 
 
 class DeleteCategoryUseCase:
-    def __init__(self, repo: CategoryRepository):
+    def __init__(self, repo: Repository[Category]):
         self.repo = repo
 
     def execute(self, id: int) -> None:
@@ -34,7 +34,7 @@ class DeleteCategoryUseCase:
 
 
 class GetAllCategoriesUseCase:
-    def __init__(self, repo: CategoryRepository):
+    def __init__(self, repo: Repository[Category]):
         self.repo = repo
 
     def execute(self) -> list[CategoryOutput]:
@@ -42,8 +42,8 @@ class GetAllCategoriesUseCase:
         return [category.dict() for category in categories]
 
 
-class GetCategoryUseCase:
-    def __init__(self, repo: CategoryRepository):
+class GetCategoryByIdUseCase:
+    def __init__(self, repo: Repository[Category]):
         self.repo = repo
 
     def execute(self, id: int) -> Optional[CategoryOutput]:
