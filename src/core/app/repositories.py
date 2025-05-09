@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, List, TypeVar
+from typing import Generic, List, Optional, TypeVar
 
 T = TypeVar("T")
 
@@ -22,5 +22,13 @@ class Repository(Generic[T], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_by_id(self, id: int) -> T | None:
+    def get_by_id(self, id: int) -> Optional[T]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def first(self, **kwargs) -> Optional[T]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def filter_by(self, **kwargs) -> List[T]:
         raise NotImplementedError

@@ -6,7 +6,7 @@ from src.product.infra.models import CategoryModel, ProductModel
 
 
 class CategoryMapper(Mapper[Category, CategoryModel]):
-    def to_entity(self, model: CategoryModel | None) -> Optional[Category]:
+    def to_entity(self, model: Optional[CategoryModel]) -> Optional[Category]:
         """Converts an infrastructure model to a domain entity"""
         if not model:
             return None
@@ -32,28 +32,29 @@ class CategoryMapper(Mapper[Category, CategoryModel]):
         return result
 
 
-class ProductMapper:
-    @staticmethod
-    def to_entity(model: ProductModel) -> Product:
+class ProductMapper(Mapper[Product, ProductModel]):
+    def to_entity(self, model: Optional[ProductModel]) -> Optional[Product]:
         """Converts an infrastructure model to a domain entity"""
+        if not model:
+            return None
+
         return Product(
             id=model.id,
             name=model.name,
             sku=model.sku,
             description=model.description,
-            category=model.category,
+            category_id=model.category_id,
             created_at=model.created_at,
         )
 
-    @staticmethod
-    def to_dict(entity: Product) -> Dict[str, Any]:
+    def to_dict(self, entity: Product) -> Dict[str, Any]:
         """Converts a domain entity to a dictionary for creating a model"""
         # Exclude id and created_at if they are None (for creation)
         result = {
             "name": entity.name,
             "sku": entity.sku,
             "description": entity.description,
-            "category": entity.category,
+            "category_id": entity.category_id,
         }
 
         # Only include these fields if they are not None
